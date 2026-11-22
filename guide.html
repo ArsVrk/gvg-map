@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мапа ГВГ — як користуватися</title>
+<meta name="description" content="Короткий гайд по інтерактивній мапі поля бою ГВГ: вежі й радіуси, плани атаки та оборони з етапами, спільні плани клану.">
+<style>
+  /* Layout: one reading column, each feature = short text + screenshot. Palette taken from the map itself. */
+  :root {
+    color-scheme: dark;
+    --bg:#16181d; --panel:#1f232b; --line:#333a46; --text:#e6e8ec; --muted:#9aa3b2; --accent:#e0b04a;
+    --red:#ff3c28; --blue:#3c8cff; --yellow:#ffe13c; --orange:#ff8c00; --cyan:#50c8ff; --green:#3cff78;
+  }
+  * { box-sizing:border-box; }
+  html, body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 system-ui, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width:980px; margin:0 auto; padding-block:28px 60px; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); }
+  header { display:grid; gap:14px; padding-bottom:22px; border-bottom:1px solid var(--line); }
+  h1 { font-size:clamp(28px, 4.5vw, 40px); line-height:1.15; margin:0; text-wrap:balance; }
+  h1 span { color:var(--accent); }
+  .lead { color:var(--muted); max-width:62ch; margin:0; }
+  .cta { display:flex; gap:10px; flex-wrap:wrap; }
+  .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 16px; border-radius:8px; font-weight:600; text-decoration:none; border:1px solid var(--line); color:var(--text); background:var(--panel); }
+  .btn.main { background:var(--accent); color:#1a1a1a; border-color:var(--accent); }
+  .btn:hover { border-color:var(--accent); }
+  .btn:focus-visible, a:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  nav.toc { display:flex; flex-wrap:wrap; gap:6px 14px; font-size:14px; padding:14px 0 0; }
+  nav.toc a { color:var(--muted); text-decoration:none; }
+  nav.toc a:hover { color:var(--accent); }
+  section { padding-top:36px; display:grid; gap:12px; }
+  h2 { font-size:22px; margin:0; display:flex; align-items:baseline; gap:10px; text-wrap:balance; }
+  h2 .n { font:700 13px/1 ui-monospace, Consolas, monospace; color:#1a1a1a; background:var(--accent); border-radius:5px; padding:4px 6px; }
+  p { margin:0; max-width:68ch; }
+  ul, ol { margin:0; padding-left:22px; max-width:70ch; display:grid; gap:4px; }
+  li::marker { color:var(--accent); }
+  b { color:#fff; }
+  .muted { color:var(--muted); }
+  kbd { font:600 12.5px ui-monospace, Consolas, monospace; background:var(--panel); border:1px solid var(--line); border-bottom-width:2px; border-radius:4px; padding:1px 6px; }
+  figure { margin:6px 0 0; }
+  figure a { display:block; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#0d0f13; }
+  figure img { display:block; width:100%; height:auto; }
+  figcaption { color:var(--muted); font-size:14px; margin-top:6px; }
+  .two { display:grid; grid-template-columns:1fr 330px; gap:20px; align-items:start; }
+  .two > * { min-width:0; }
+  .legend { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:6px 18px; padding:0; list-style:none; max-width:none; }
+  .legend li { display:flex; gap:9px; align-items:baseline; }
+  .sw { width:12px; height:12px; border-radius:3px; flex:none; border:1px solid #0008; transform:translateY(1px); }
+  .tri { width:0; height:0; border-left:7px solid transparent; border-right:7px solid transparent; border-bottom:12px solid; flex:none; }
+  .heat { display:flex; gap:8px; flex-wrap:wrap; font-size:14px; }
+  .heat span { padding:2px 10px; border-radius:20px; color:#1a1a1a; font-weight:600; }
+  .note { background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:8px; padding:12px 14px; max-width:none; }
+  .note p + p { margin-top:6px; }
+  footer { margin-top:44px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:14px; }
+  @media (max-width: 760px) { .two { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Мапа ГВГ — <span>як користуватися</span></h1>
+    <p class="lead">Інтерактивна мапа поля бою ГВГ: де стоять вежі, стражники й катапульти, куди вони б'ють, і плани атаки та оборони по етапах, які бачить увесь клан.</p>
+    <div class="cta">
+      <a class="btn main" href="./">Відкрити мапу</a>
+      <a class="btn" href="./?demo=1">Подивитися приклад плану</a>
+    </div>
+    <figure><a href="guide/01-overview.jpg" target="_blank"><img src="guide/01-overview.jpg" alt="Мапа поля бою з прикладом плану штурму: вежі з радіусами, стрілки паків, зони й катапульти" width="1440" height="900"></a>
+      <figcaption>Приклад плану штурму на мапі: вежі з радіусами, маршрути паків, зони й катапульти.</figcaption></figure>
+    <nav class="toc">
+      <a href="#start">Швидкий старт</a><a href="#map">Що на мапі</a><a href="#heat">Перекриття веж</a>
+      <a href="#plan">Свій план</a><a href="#stages">Етапи</a><a href="#cata">Катапульти</a><a href="#shared">Плани клану</a><a href="#faq">Корисно знати</a>
+    </nav>
+  </header>
+
+  <section id="start">
+    <h2><span class="n">1</span> Швидкий старт</h2>
+    <div class="two">
+      <ol>
+        <li>Відкрийте <a href="./" style="color:var(--accent)">мапу</a>. На комп'ютері панель зліва, на телефоні — за кнопкою <kbd>☰ Шари</kbd>.</li>
+        <li>Угорі виберіть <b>рівень території</b>. Від нього залежить розстановка: на T-3 немає стражників на стінах і по 4 катапульти, на T-2 і T-1 з'являються стражники, а в нападників — 6 і 8 катапульт.</li>
+        <li>У блоці <b>«Спільні плани клану»</b> введіть свій нік і пароль клану (його дає лідер) і натисніть <b>Підключитися</b>. Браузер запам'ятає це, і наступного разу підключення буде автоматичним.</li>
+        <li>Не знаєте, з чого почати? Відкрийте <a href="./?demo=1" style="color:var(--accent)">приклад плану</a>: там готовий штурм на три етапи, який можна крутити як завгодно, нічого не зберігається.</li>
+      </ol>
+      <figure><a href="guide/08-sync.jpg" target="_blank"><img src="guide/08-sync.jpg" alt="Блок «Спільні плани клану»: поля для ніку й пароля і кнопка «Підключитися»" width="330" height="520" loading="lazy"></a>
+        <figcaption>Підключення до планів клану.</figcaption></figure>
+    </div>
+  </section>
+
+  <section id="map">
+    <h2><span class="n">2</span> Що на мапі</h2>
+    <ul class="legend">
+      <li><span class="sw" style="background:var(--red)"></span><span><b>Стрілецька вежа</b> — основа, на якій будують вежу. Радіус <b>40 м</b>.</span></li>
+      <li><span class="tri" style="color:var(--yellow)"></span><span><b>Стражник міста</b> — лучник на стіні (T-2, T-1). Радіус <b>40 м</b>.</span></li>
+      <li><span class="tri" style="color:var(--orange)"></span><span><b>Сторожова вежа</b> біля точки відродження. Радіус <b>40 м</b>.</span></li>
+      <li><span class="sw" style="background:#c878ff;transform:translateY(1px) rotate(45deg)"></span><span><b>Катапульта</b> на базі. Радіус <b>35 м</b>.</span></li>
+      <li><span class="sw" style="background:var(--cyan);border-radius:50%"></span><span><b>Центральний кристал</b> — головна ціль ГВГ.</span></li>
+      <li><span class="sw" style="background:var(--green);border-radius:50%"></span><span><b>Точка відродження</b>.</span></li>
+      <li><span class="sw" style="background:#fff;width:7px"></span><span><b>Прив'язка</b> і <span style="color:#7dffd6">стовпчик для набивання чі</span> (правий у парі).</span></li>
+      <li><span class="sw" style="background:#28aa46;border-radius:50%"></span><span><b>Дерева</b> — щоб орієнтуватися на місцевості.</span></li>
+    </ul>
+    <figure><a href="guide/02-objects.jpg" target="_blank"><img src="guide/02-objects.jpg" alt="Синя база на мапі «Рельєф»: стрілецькі вежі з колами радіуса 40 м, сторожові вежі, катапульти й кристал" width="1440" height="900" loading="lazy"></a>
+      <figcaption>База оборонців на мапі «Рельєф» з радіусами веж.</figcaption></figure>
+    <ul>
+      <li><b>Наведіть</b> на точку, щоб побачити назву, координати й радіус. Координати <b>X, Y такі самі, як у грі</b> (у правому верхньому куті ігрового екрана).</li>
+      <li><b>Клік по точці</b> відкриває її налаштування: сховати, дати свій підпис (наприклад, «Вежа Васі»), змінити радіус.</li>
+      <li>Три вигляди мапи: <b>Велика</b> (ігрова мапа), <b>Рельєф</b> (пагорби, урвища, стіни й озеро — найдетальніша) і <b>Мінімапа</b>.</li>
+      <li>Червона база — <b>атакуючі</b>, синя — <b>оборонці</b>. Плашки з назвами сторін стоять біля баз.</li>
+      <li>В «Інше»: <b>лінійка</b> (клік — точка, подвійний клік — скинути) і <b>координати з висотою</b> біля курсора.</li>
+    </ul>
+  </section>
+
+  <section id="heat">
+    <h2><span class="n">3</span> Перекриття веж</h2>
+    <p>Галочка <b>«Перекриття веж»</b> у розділі «Обʼєкти і радіуси» підсвічує, скільки веж б'є в кожну точку. Видно безпечні проходи й місця, куди без катапульти краще не лізти. Можна рахувати вежі лише атакуючих, лише оборонців або всі.</p>
+    <div class="heat"><span style="background:#ffe600">1 вежа</span><span style="background:#ff8c00">2 вежі</span><span style="background:#ff2800;color:#fff">3 вежі</span><span style="background:#be005a;color:#fff">4 і більше</span></div>
+    <figure><a href="guide/03-heat.jpg" target="_blank"><img src="guide/03-heat.jpg" alt="Мапа з підсвіткою перекриття веж біля синьої бази: що ближче до воріт, то більше веж б'є в точку" width="1440" height="900" loading="lazy"></a>
+      <figcaption>Перекриття біля синьої бази. Знизу зліва видно, скільки веж б'є в точку під курсором.</figcaption></figure>
+  </section>
+
+  <section id="plan">
+    <h2><span class="n">4</span> Свій план</h2>
+    <ul>
+      <li>У «Мій план» можна мати кілька планів: <b>Новий</b>, <b>Назва</b>, <b>Копія</b>, <b>Видалити</b>. Позначте сторону: <b>Атака</b> чи <b>Оборона</b>.</li>
+      <li>У «Свої мітки» є <b>Катапульта</b>, <b>Мітка</b> і <b>Текст</b> (ставляться кліком по мапі), <b>Зона</b> (тягніть від центру) і <b>Стрілка</b> (тягніть від початку до кінця).</li>
+      <li>Стрілку можна <b>зігнути</b>: клікніть по ній і потягніть жовтий квадратик посередині. Там же колір, товщина, пунктир і підпис («Пак 1»).</li>
+      <li><b>Катапульти з бази</b> можна перетягувати й перейменовувати, наприклад «Катапульта · пак 1», щоб було видно, хто яку бере. Щойно катапульта зрушила з місця, з'являється її радіус.</li>
+      <li>Своє перетягується мишкою. <kbd>Delete</kbd> видаляє виділене, <kbd>Esc</kbd> виходить з режиму розстановки.</li>
+    </ul>
+    <figure><a href="guide/04-stage1.jpg" target="_blank"><img src="guide/04-stage1.jpg" alt="Перший етап прикладу: зона збору біля червоної бази, стрілки «Пак 1» і «Пак 2» по двох дорогах, катапульти рушають уперед" width="1440" height="900" loading="lazy"></a>
+      <figcaption>Приклад, етап «Підхід»: зона збору, два паки по різних дорогах, катапульти виходять з бази.</figcaption></figure>
+  </section>
+
+  <section id="stages">
+    <h2><span class="n">5</span> Етапи</h2>
+    <ul>
+      <li>Смуга <b>«Етап»</b> унизу мапи: <kbd>+</kbd> додає етап, подвійний клік по назві перейменовує, <b>Усі</b> показує весь план одразу.</li>
+      <li>Усе, що ви ставите, коли вибрано етап, належить <b>цьому етапу</b>. Попередні етапи видно блідо, наступні сховані, тож план можна показувати клану крок за кроком.</li>
+      <li><b>Одна й та сама катапульта на кожному етапі стоїть на своєму місці</b>: виберіть етап і перетягніть її. Пунктир з номерами показує маршрут.</li>
+      <li>Вежу, яку зносять, позначте <b>«Знищена з етапу»</b> (клік по вежі). З цього етапу вона перекреслена, без радіуса і не рахується в перекритті та цілях катапульт.</li>
+    </ul>
+    <figure><a href="guide/06-stage3.jpg" target="_blank"><img src="guide/06-stage3.jpg" alt="Етап «Кристал»: вежі біля воріт 2 і 3 перекреслені як знищені, катапульти в замку біля кристала, жовта стрілка «Усі на кристал»" width="1440" height="900" loading="lazy"></a>
+      <figcaption>Етап «Кристал»: вежі біля воріт знищені (перекреслені), катапульти вже біля кристала.</figcaption></figure>
+  </section>
+
+  <section id="cata">
+    <h2><span class="n">6</span> Катапульти: що вони дістають</h2>
+    <p>Клік по катапульті показує <b>найближчу ціль</b>, усе, що вона дістає (радіус 35 м, разом із кристалом), і <b>які вежі б'ють по ній</b>. Від катапульти до найближчої цілі тягнеться пунктирна лінія.</p>
+    <figure><a href="guide/05-stage2.jpg" target="_blank"><img src="guide/05-stage2.jpg" alt="Етап «Ворота 2»: катапульта біля воріт, відкрите вікно з найближчою ціллю, списком цілей у радіусі і веж, що б'ють по ній" width="1440" height="900" loading="lazy"></a>
+      <figcaption>Етап «Ворота 2»: катапульта дістає дві вежі, і ці самі дві вежі б'ють по ній.</figcaption></figure>
+    <div class="note"><p>Радіус 40 м у веж і 35 м у катапульт узято з даних гри, а 40 м ще й перевірено в грі. Яку ціль катапульта бере першою, коли їх кілька, у файлах гри не записано: «найближча» тут лише найімовірніший варіант.</p></div>
+  </section>
+
+  <section id="shared">
+    <h2><span class="n">7</span> Плани клану</h2>
+    <ul>
+      <li>Після підключення ваші плани <b>зберігаються самі</b> за кілька секунд після кожної зміни. Натискати нічого не треба.</li>
+      <li>Плани інших з'являються в <b>«Інші плани поверх»</b> з ніком автора. Галочка накладає план на ваш напівпрозоро: так атаку й оборону можна подивитися разом.</li>
+      <li>Увімкнений чужий план оновлюється кожні 20 секунд, решта списку — раз на хвилину. <b>Оновити зараз</b> робить це миттєво.</li>
+      <li><b>Копія</b> забирає чужий план собі, щоб його змінити. <b>Сховати</b> прибирає план зі списку тільки у вас.</li>
+      <li>Свої плани може змінювати лише автор. Чужі видаляє тільки адміністратор клану.</li>
+    </ul>
+    <figure><a href="guide/07-overlay.jpg" target="_blank"><img src="guide/07-overlay.jpg" alt="План атаки з накладеним планом оборони: сині й фіолетові стрілки оборонців поверх червоних стрілок атаки" width="1440" height="900" loading="lazy"></a>
+      <figcaption>План атаки, а поверх нього план оборони (сині й фіолетові стрілки).</figcaption></figure>
+  </section>
+
+  <section id="faq">
+    <h2><span class="n">8</span> Корисно знати</h2>
+    <ul>
+      <li>Розстановку взято з файлів сервера й звірено з грою та відео з ГВГ.</li>
+      <li>Ваші плани зберігаються ще й у вашому браузері. Якщо відкрити сайт в іншому браузері чи на іншому пристрої, підключіться тим самим ніком і паролем.</li>
+      <li>Свої підписи, сховані точки й радіуси належать <b>плану</b>: якщо ввімкнути чийсь план поверх, видно його мітки, стрілки й зони.</li>
+      <li><b>Зберегти PNG</b> (розділ «Інше») зберігає те, що зараз на екрані, — зручно скинути в чат.</li>
+    </ul>
+  </section>
+
+  <footer>Мапа ГВГ · <a href="./" style="color:var(--accent)">відкрити мапу</a> · <a href="./?demo=1" style="color:var(--accent)">приклад плану</a></footer>
+</div>
+</body>
+</html>

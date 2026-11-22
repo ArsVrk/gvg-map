@@ -73,7 +73,8 @@
 <div id="app">
   <aside id="side">
     <h1>Поле бою ГВГ</h1>
-    <div class="sub">Координати X, Y як у грі. Клік по точці — її налаштування.</div>
+    <div class="sub" id="subLine">Координати X, Y як у грі. Клік по точці — її налаштування.</div>
+    <div class="note" id="guideLine" hidden style="margin:-4px 0 8px"><a href="guide.html" target="_blank" style="color:var(--accent)">Як користуватися сайтом</a> · <a href="?demo=1" target="_blank" style="color:var(--accent)">Приклад плану</a></div>
 
     <h2>Рівень території</h2>
     <div class="seg" id="tierSeg"></div>
@@ -1233,6 +1234,57 @@ function hover(sx, sy) {
   tip.style.left = Math.min(sx+14, cv.clientWidth-tip.offsetWidth-6)+'px'; tip.style.top = (sy+14)+'px';
 }
 
+
+// ================= example plan (?demo=1) =================
+// Loaded in memory only: nothing is saved locally or sent to the clan table.
+// URL options (also used for the guide screenshots): map=big|relief|mini, tier, stage, heat=1, ov=1, zoom, cx, cz, pop=c1|c2, sel=a1..
+const IS_SITE = !!(D.sync && D.sync.url);
+if (IS_SITE) $('guideLine').hidden = false;
+const QP = new URLSearchParams(location.search);
+function demoPlans() {
+  const C1 = 'cata:-303.5:-271.6', C2 = 'cata:-298.6:-277.3';
+  const atk = normPlan({ id:'pdemo', name:'Приклад: штурм через ворота 2', tier:'T3', side:'atk', upd:1,
+    stages:['Підхід', 'Ворота 2', 'Кристал'],
+    it:{ label:{ [C1]:'Катапульта · пак 1', [C2]:'Катапульта · пак 2' },
+         pos:{ [C1]:{ 1:[30, 25], 2:[190, 198], 3:[250, 262] }, [C2]:{ 1:[150, -250], 2:[255, 150], 3:[262, 248] } },
+         off:{ 'base:54.8:75.5':2, 'base:72.7:54':2, 'base:199.7:225.1':3, 'base:219:206.3':3, 'base:280.5:171.3':3 },
+         user:[ { key:'ud1', k:'mark', x:-20, z:300, l:'Розвідка', c:'#ffe13c', stage:1 },
+                { key:'ud2', k:'text', x:228, z:308, l:'ЗНЕСТИ КРИСТАЛ', c:'#50c8ff', stage:3 } ],
+         zones:[ { key:'zd1', x:-150, z:-118, r:26, c:'#3cf0ff', l:'Збір', stage:1 },
+                 { key:'zd2', x:150, z:168, r:20, c:'#3cff78', l:'Хіли', stage:2 } ],
+         arrows:[ { key:'ad1', x1:-175, z1:-140, x2:35, z2:40, cx:-60, cz:-120, c:'#ff3c28', w:3, t:'Пак 1', stage:1 },
+                  { key:'ad2', x1:-120, z1:-280, x2:140, z2:-245, cx:20, cz:-300, c:'#3c8cff', w:3, t:'Пак 2', stage:1 },
+                  { key:'ad3', x1:55, z1:60, x2:185, z2:195, c:'#ff3c28', w:3, t:'Пак 1 → ворота 2', stage:2 },
+                  { key:'ad4', x1:150, z1:-240, x2:250, z2:140, cx:265, cz:-80, c:'#3c8cff', w:3, t:'Пак 2 → ворота 3', stage:2 },
+                  { key:'ad5', x1:205, z1:210, x2:252, z2:265, c:'#ffe13c', w:5, dash:true, t:'Усі на кристал', stage:3 } ] } });
+  const def = normPlan({ id:'pdef', name:'Приклад: оборона', tier:'T3', side:'def', upd:1, stages:[],
+    it:{ arrows:[ { key:'bd1', x1:300, z1:300, x2:215, z2:220, c:'#3c8cff', w:3, t:'Захист воріт 2' },
+                  { key:'bd2', x1:300, z1:300, x2:20, z2:300, cx:180, cz:340, c:'#c878ff', w:3, dash:true, t:'Засідка на 4' } ],
+         zones:[ { key:'bz1', x:250, z:225, r:22, c:'#3c8cff', l:'Тримати' } ] } });
+  return [atk, def];
+}
+if (QP.has('demo')) {
+  canSave = false; RS.url = '';
+  if (IS_SITE) { $('codeRow').hidden = $('expRow').hidden = true; $('syncNote').textContent = ''; }
+  S = { v:2, plans:demoPlans(), active:{ T3:'pdemo' }, overlay:{}, hideOv:{} };
+  if (QP.get('clean') === '1') { S.plans.push(normPlan({ id:'pclean', name:'Мій план', tier:'T3', upd:1 })); S.active.T3 = 'pclean'; }
+  if (QP.get('ov') === '1') S.overlay['l:pdef'] = 1;
+  st.tier = QP.get('tier') || 'T3';
+  st.stage = +(QP.get('stage') || 0);
+  if (QP.get('heat') === '1') { st.heat = true; $('heat').checked = true; $('heatSeg').style.display = 'flex'; }
+  if (QP.get('map')) { st.map = QP.get('map'); document.querySelectorAll('#mapSeg button').forEach(x => x.classList.toggle('on', x.dataset.m === st.map)); }
+  $('subLine').innerHTML = '<span style="color:var(--accent)">Це приклад плану.</span> Можна все розглядати й змінювати, але нічого не зберігається.';
+  $('saveNote').textContent = 'Приклад: зміни не зберігаються.';
+  setTimeout(() => {
+    const z = +(QP.get('zoom') || 0);
+    if (z) { userMoved = true; fit(); zoomAt(cv.clientWidth/2, cv.clientHeight/2, z); }
+    if (QP.has('cx')) centerOnW(+QP.get('cx'), +QP.get('cz'));
+    const pk = QP.get('pop');
+    if (pk) { const key = pk === 'c2' ? 'cata:-298.6:-277.3' : 'cata:-303.5:-271.6'; const o = OBJS.find(q => q.key === key); if (o) openPop(o); }
+    const sa = QP.get('sel'); if (sa) { const a = it().arrows.find(x => x.key === 'ad' + sa); if (a) openArrowPop(a); }
+    draw();
+  }, 250);
+}
 if (!canSave) $('saveNote').innerHTML = '<span style="color:#e0b04a">Цей браузер не дозволяє зберігати зміни — вони зникнуть після закриття. Використовуйте «Скопіювати код плану» або «Експорт».</span>';
 loadTier(); refreshSide();
 new ResizeObserver(() => { resize(); if (!userMoved) fit(); else placePop(); }).observe(cv);
